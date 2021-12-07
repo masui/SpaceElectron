@@ -15,23 +15,19 @@ const url = require('url');
 const path = require('path');
 const fs = require('fs');
 const mime = require('mime-types')
-//const fetch = require('node-fetch');
-//import fetch from 'node-fetch'
 const fetch = require('fetch');
  
 const { google } = require('googleapis');
 
+// アプリのパスを取得したいが、Electronの場合とnodeから起動の場合で場所が違う
 apppath = process.argv[0]
 if(apppath.match(/\/node$/)){
     apppath = process.argv[1]
 }
 const appdir = path.dirname(apppath)
-console.log(appdir)
 
 const google_refresh_token_path = appdir + '/google_refresh_token'
 var google_refresh_token = null
-
-console.log(google_refresh_token_path)
 
 const client_id = "245084284632-v88q7r65ddine8aa94qp7ribop4018eg.apps.googleusercontent.com"
 const client_secret = "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"
@@ -42,71 +38,74 @@ async function upload_googledrive(file){
 	google_refresh_token = buff.trim()
 	
 	await upload_googledrive_with_token(file,google_refresh_token)
+	console.log("upload_googledrive_with_token() call end")
     }
     else{
 	await get_google_refresh_token_and_upload(file)
+	console.log("get_google_refresh_token_and_upload() call  end")
     }
+    console.log("upload_googledrive end")
 }
 
-function upload_googledrive_with_token(file,token){
-    console.log(`upload: token=${token}`)
+async function upload_googledrive_with_token(file,google_refresh_token){
+    console.log(`upload: token=${google_refresh_token}`)
 
     var oauth2Client = new google.auth.OAuth2(client_id, client_secret, "http://localhost/");
     oauth2Client.setCredentials({
-	refresh_token: token
+	refresh_token: google_refresh_token
     });
 
-    oauth2Client.refreshAccessToken(function(err,res){
-	var drive = google.drive({ version: 'v3', auth: oauth2Client });
-	drive.files.list({
-	    //q: "title='Space'"
-	    q: "name = 'Space' and mimeType = 'application/vnd.google-apps.folder' and parents in 'root'"
-	},async function(err,res2){
-	    var folderId = null
+    res = await oauth2Client.refreshAccessToken()
+    var drive = google.drive({ version: 'v3', auth: oauth2Client });
+    res2 = await drive.files.list({
+	q: "name = 'Space' and mimeType = 'application/vnd.google-apps.folder' and parents in 'root'"
+    })
 
-	    if(res2.data.files.length <= 0){ // Spaceフォルダが存在しない場合
-		const fileMetadata = {
-		    'name': 'Space', //作成したいフォルダの名前
-		    'mimeType': 'application/vnd.google-apps.folder'
-		};
-		const params = {
-		    resource: fileMetadata,
-		    fields: 'id'
-		}
-		try {
-		    const res = await drive.files.create(params);
-		    console.log("folder created")
-		    console.log(res.data);
-		    folderId = res.data.id
-		} catch (error) {
-		    console.log(error);
-		}
-	    }
-	    else {
-		// Spaceという名前のフォルダを探してIDを取得する
-		folderId = res2.data.files[0].id
-	    }
+    // console.log(res2.data)
+    if(res2.data.files.length <= 0){ // Spaceフォルダが存在しない場合
+	const fileMetadata = {
+	    'name': 'Space', //作成したいフォルダの名前
+	    'mimeType': 'application/vnd.google-apps.folder'
+	};
+	const params = {
+	    resource: fileMetadata,
+	    fields: 'id'
+	}
+	try {
+	    const res = await drive.files.create(params);
+	    console.log("folder created")
+	    console.log(res.data);
+	    folderId = res.data.id
+	} catch (error) {
+	    console.log(error);
+	}
+    }
+    else {
+	// Spaceという名前のフォルダを探してIDを取得する
+	folderId = res2.data.files[0].id
+    }
+    console.log(`folderId = ${folderId}`)
 
-	    const filename = path.basename(file)
-	    
-	    const params = {
-		resource: {
-		    name: filename,
-		    parents: [folderId]
-		},
-		media: {
-		    mimeType: mime.lookup(file),
-		    body: fs.createReadStream(file)
-		},
-		fields: 'id'
-	    };
-	    
-	    const res = drive.files.create(params);
+    const filename = path.basename(file)
+    
+    const params = {
+	resource: {
+	    name: filename,
+	    parents: [folderId]
+	},
+	media: {
+	    mimeType: mime.lookup(file),
+	    body: fs.createReadStream(file)
+	},
+	fields: 'id'
+    };
+    
+    console.log("try to create a file")
+    await drive.files.create(params);
+    console.log("upload real end-------")
 
-	});
-    });
 }
-
+				    
 const oauth2Client = new google.auth.OAuth2(
     client_id,
     client_secret,
