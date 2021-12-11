@@ -2,9 +2,9 @@
 # make enableすると動くようになる
 make: clean
 	npx electron-builder --mac --x64 --dir
-	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > info.json
-	ruby bin/droppable.rb info.json > info2.json
-	plutil -convert binary1 info2.json -o dist/mac/Space.app/Contents/Info.plist
+	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
+	ruby bin/droppable.rb /tmp/info.json > /tmp/info2.json
+	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
 
 #mac:
 #	electron-packager ./app serencast --overwrite --platform=darwin --arch=x64 --electronV

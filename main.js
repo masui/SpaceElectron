@@ -8,8 +8,8 @@ const fs = require('fs');
 // 指定されたファイルをアップロードするメインルーチン
 //
 async function process(file){  
-    await googledrive.upload(file)
-    console.log("upload end")
+    var googleurl = await googledrive.upload(file)
+    console.log(`upload end googleurl = #{googleurl}`)
 
     await fs.writeFileSync("/tmp/log",process.argv[0])
     console.log("log written")

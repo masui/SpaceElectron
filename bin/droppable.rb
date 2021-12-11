@@ -1,5 +1,5 @@
 #
-# アプリケーションアイコンでDrag&Dropを許す
+# アプリケーションアイコンでDrag&Dropを許すようにInfo.plistを修正
 #
 require 'json'
 

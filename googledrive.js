@@ -1,4 +1,8 @@
 //
+// このバージョンはupload_googledrive()が終了した後で実際に認証が
+// 行なわれるので同期処理が難しい。
+// もっと同期的に動くものに変更する。
+//
 // fetchの使いかた
 // https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch
 //
@@ -33,18 +37,21 @@ const client_id = "245084284632-v88q7r65ddine8aa94qp7ribop4018eg.apps.googleuser
 const client_secret = "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"
 
 async function upload_googledrive(file){
+    var url
     if(fs.existsSync(google_refresh_token_path)){
 	const buff = fs.readFileSync(google_refresh_token_path, "utf8");
 	google_refresh_token = buff.trim()
 	
-	await upload_googledrive_with_token(file,google_refresh_token)
+	url = await upload_googledrive_with_token(file,google_refresh_token)
 	console.log("upload_googledrive_with_token() call end")
     }
     else{
-	await get_google_refresh_token_and_upload(file)
+	url = await get_google_refresh_token_and_upload(file)
 	console.log("get_google_refresh_token_and_upload() call  end")
     }
     console.log("upload_googledrive end")
+
+    return url
 }
 
 async function upload_googledrive_with_token(file,google_refresh_token){
@@ -55,7 +62,7 @@ async function upload_googledrive_with_token(file,google_refresh_token){
 	refresh_token: google_refresh_token
     });
 
-    res = await oauth2Client.refreshAccessToken()
+    var res1 = await oauth2Client.refreshAccessToken()
     var drive = google.drive({ version: 'v3', auth: oauth2Client });
     res2 = await drive.files.list({
 	q: "name = 'Space' and mimeType = 'application/vnd.google-apps.folder' and parents in 'root'"
@@ -101,9 +108,10 @@ async function upload_googledrive_with_token(file,google_refresh_token){
     };
     
     console.log("try to create a file")
-    await drive.files.create(params);
+    const res = await drive.files.create(params);
     console.log("upload real end-------")
 
+    return `https://drive.google.com/open?id=${res.id}`
 }
 				    
 const oauth2Client = new google.auth.OAuth2(
@@ -172,6 +180,15 @@ async function get_google_refresh_token_and_upload(file){
     }
 }
 
-// upload_googledrive("/Users/masui/Desktop/kanribo.zip")
+// テスト
+if(__filename == apppath){
+    (async () => {
+	var tmpfilepath = "/tmp/tmp.txt"
+	fs.writeFileSync(tmpfilepath,"abcdefg\n")
+	var url = await upload_googledrive(tmpfilepath)
+	console.log(`URL = ${url}`)
+	// process.exit(0)
+    })()
+}
 
 exports.upload = upload_googledrive
