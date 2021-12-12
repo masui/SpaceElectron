@@ -53,11 +53,11 @@ function thumbnail_html(file){
 	  background-color: #eee;
 	  margin: 10pt;
 	  font-size:40pt;
-	  font-family: "Helvetica Neue" , Helvetica , Arial ,
-		       Verdana , Roboto , "游ゴシック" , "Yu Gothic" ,
-		       "游ゴシック体" , "YuGothic" , "ヒラギノ角ゴ Pro W3" ,
-		       "Hiragino Kaku Gothic Pro" , "Meiryo UI" , "メイリオ" ,
-		       Meiryo , "ＭＳ Ｐゴシック" , "MS PGothic" , sans-serif;
+	  font-family: "Helvetica Neue", Helvetica, Arial,
+		       Verdana, Roboto, "游ゴシック", "Yu Gothic",
+		       "游ゴシック体", "YuGothic", "ヒラギノ角ゴ Pro W3",
+		       "Hiragino Kaku Gothic Pro", "Meiryo UI", "メイリオ",
+		       Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
       }
     </style>
   </head>

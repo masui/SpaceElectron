@@ -31,8 +31,8 @@
         "asar": false,
         "files": [
             "main.js",
-	    "googledrive.js",
-	    "thumbnail.js",
+            "googledrive.js",
+            "thumbnail.js",
             "package.json"
         ]
     }
