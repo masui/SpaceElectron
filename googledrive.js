@@ -1,17 +1,7 @@
 //
-// このバージョンはupload_googledrive()が終了した後で実際に認証が
-// 行なわれるので同期処理が難しい。
-// もっと同期的に動くものに変更する。
+// Google認証してGoogleDriveにファイルをアップロードする
+// 同期的に動かせるように苦しいことをしている
 //
-// fetchの使いかた
-// https://developer.mozilla.org/ja/docs/Web/API/Fetch_API/Using_Fetch
-//
-// open
-// https://www.npmjs.com/package/opn
-//
-// asyncが全然無意味な気がする...
-//
-
 const http = require('http');
 const querystring = require('querystring');
 const open = require('open');
@@ -20,55 +10,111 @@ const path = require('path');
 const fs = require('fs');
 const mime = require('mime-types')
 const fetch = require('fetch');
- 
 const { google } = require('googleapis');
 
-// アプリのパスを取得したいが、Electronの場合とnodeから起動の場合で場所が違う
-apppath = process.argv[0]
+// アプリのパスを取得
+// Electronの場合とnodeから起動の場合で場所が違う
+var apppath = process.argv[0]
 if(apppath.match(/\/node$/)){
     apppath = process.argv[1]
 }
 const appdir = path.dirname(apppath)
+const google_refresh_token_path = appdir + '/google_refresh_token' // refresh token保存場所
 
-const google_refresh_token_path = appdir + '/google_refresh_token'
-var google_refresh_token = null
-
-const client_id = "245084284632-v88q7r65ddine8aa94qp7ribop4018eg.apps.googleusercontent.com"
-const client_secret = "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"
-
-async function upload_googledrive(file){
-    var url
+function google_refresh_token(){
     if(fs.existsSync(google_refresh_token_path)){
 	const buff = fs.readFileSync(google_refresh_token_path, "utf8");
-	google_refresh_token = buff.trim()
-	
-	url = await upload_googledrive_with_token(file,google_refresh_token)
-	console.log("upload_googledrive_with_token() call end")
+	return buff.trim()
     }
     else{
-	url = await get_google_refresh_token_and_upload(file)
-	console.log("get_google_refresh_token_and_upload() call  end")
+	return null
     }
-    console.log("upload_googledrive end")
+}
 
-    return url
+//
+// Spaceアプリの認証情報
+//
+const google_client_id = "245084284632-v88q7r65ddine8aa94qp7ribop4018eg.apps.googleusercontent.com"
+const google_client_secret = "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"
+const oauth2Client = new google.auth.OAuth2(
+    google_client_id,
+    google_client_secret,
+    "http://localhost/"
+);
+
+const scopes = [
+    'https://www.googleapis.com/auth/drive'
+];
+
+const auth_url = oauth2Client.generateAuthUrl({
+    access_type: 'offline',  // onlineがデフォルトだがofflineにするとrefresh tokenを取得できる
+    scope: scopes
+});
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// コールバックを受け取るためにlocalhostのサーバ立てる
+async function run_local_server_and_get_token(){
+    var token = null
+    const server = http.createServer(async (req, res) => {
+	if (req.url.indexOf('code') > -1) {
+	    // acquire the code from the querystring, and close the web server.
+	    const qs = querystring.parse(url.parse(req.url).query);
+	    code = qs.code
+	    res.end('Authentication successful! Please return to the console.');
+	    server.close();
+	    
+	    token = get_refresh_token_and_save(code)
+	    return token;
+	}
+    }).listen(80, () => {
+	open(auth_url)
+    });
+    
+    // tokenに値が入るまで待つ... 異常に苦しいやり方なのだが
+    while(true){
+	await sleep(1000)
+	if(token){
+	    return token
+	}
+    }
+}
+
+async function get_refresh_token_and_save(code){
+    let res = await oauth2Client.getToken(code)
+    var refresh_token = res.tokens.refresh_token
+    
+    try {
+	fs.writeFileSync(google_refresh_token_path,refresh_token + "\n")
+    } catch(e){
+	console.log(e);
+    }
+    return refresh_token;
+}
+
+async function get_google_refresh_token(){
+    var token = google_refresh_token() // セーブされてるトークンを得る
+    if(! token){ // refresh tokenをまだ取得できていない
+	token = await run_local_server_and_get_token();
+    }
+    return token;
 }
 
 async function upload_googledrive_with_token(file,google_refresh_token){
     console.log(`upload: token=${google_refresh_token}`)
 
-    var oauth2Client = new google.auth.OAuth2(client_id, client_secret, "http://localhost/");
     oauth2Client.setCredentials({
 	refresh_token: google_refresh_token
     });
 
-    var res1 = await oauth2Client.refreshAccessToken()
+    let res = await oauth2Client.refreshAccessToken()
     var drive = google.drive({ version: 'v3', auth: oauth2Client });
-    res2 = await drive.files.list({
+    var res2 = await drive.files.list({
 	q: "name = 'Space' and mimeType = 'application/vnd.google-apps.folder' and parents in 'root'"
     })
 
-    // console.log(res2.data)
     if(res2.data.files.length <= 0){ // Spaceフォルダが存在しない場合
 	const fileMetadata = {
 	    'name': 'Space', //作成したいフォルダの名前
@@ -79,7 +125,7 @@ async function upload_googledrive_with_token(file,google_refresh_token){
 	    fields: 'id'
 	}
 	try {
-	    const res = await drive.files.create(params);
+	    let res = await drive.files.create(params);
 	    console.log("folder created")
 	    console.log(res.data);
 	    folderId = res.data.id
@@ -107,77 +153,19 @@ async function upload_googledrive_with_token(file,google_refresh_token){
 	fields: 'id'
     };
     
-    console.log("try to create a file")
-    const res = await drive.files.create(params);
-    console.log("upload real end-------")
+    let res3 = await drive.files.create(params);
 
-    return `https://drive.google.com/open?id=${res.id}`
+    return `https://drive.google.com/open?id=${res3.data.id}`
 }
-				    
-const oauth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    "http://localhost/"
-);
 
-// generate a url that asks permissions for Blogger and Google Calendar scopes
-const scopes = [
-  'https://www.googleapis.com/auth/drive'
-];
+async function upload_googledrive(file){
+    var google_refresh_token = await get_google_refresh_token()
+    console.log(`google_refresh_token = ${google_refresh_token}`)
 
-const auth_url = oauth2Client.generateAuthUrl({
-  // 'online' (default) or 'offline' (gets refresh_token)
-  access_type: 'offline',
+    var url = await upload_googledrive_with_token(file,google_refresh_token)
+    console.log(`url = ${url}`)
 
-  // If you only need one scope you can pass it as a string
-  scope: scopes
-});
-
-console.log(auth_url)
-
-async function get_google_refresh_token_and_upload(file){
-    var code = ''
-    
-    console.log(`get_google_refresh_token_and_upload(${file})`)
-	
-    // コールバックを受け取るためにlocalhostのサーバ立てる
-    const server = http.createServer(async (req, res) => {
-	console.log(req.url)
-	if (req.url.indexOf('code') > -1) {
-	    // acquire the code from the querystring, and close the web server.
-	    const qs = querystring.parse(url.parse(req.url).query);
-	    console.log(`Code is ${qs.code}`);
-	    code = qs.code
-	    res.end('Authentication successful! Please return to the console.');
-	    server.close();
-	    
-	    var token = await run(code)
-	    console.log(`token = ${token}`)
-	}
-    }).listen(80, () => {
-	open(auth_url)
-    });
-
-    function run(code){
-	console.log(`run code=${code}`)
-
-	oauth2Client.getToken(code, function(err, tokens) {
-	    console.log('トークンが発行されました');
-	    console.log(tokens);
-	    console.log('上記の情報を大切に保管してください');
-	    
-	    try {
-		fs.writeFileSync(google_refresh_token_path,tokens.refresh_token + "\n")
-		console.log('write end');
-		google_refresh_token = tokens.refresh_token
-		console.log(`google_refresh_token === ${google_refresh_token}`)
-	    }catch(e){
-		console.log(e);
-	    }
-	    
-	    upload_googledrive_with_token(file,google_refresh_token)
-	});
-    }
+    return url
 }
 
 // テスト
@@ -187,7 +175,7 @@ if(__filename == apppath){
 	fs.writeFileSync(tmpfilepath,"abcdefg\n")
 	var url = await upload_googledrive(tmpfilepath)
 	console.log(`URL = ${url}`)
-	// process.exit(0)
+	process.exit(0)
     })()
 }
 
