@@ -7,7 +7,7 @@ const fs = require('fs');
 //
 // 指定されたファイルをアップロードするメインルーチン
 //
-async function doit(file){  
+async function do_space(file){  
     var googleurl = await googledrive.upload(file)
     console.log(`upload end googleurl = #{googleurl}`)
     
@@ -40,18 +40,7 @@ async function doit(file){
 app.on('will-finish-launching', () => {
     app.on('open-file', (event, filePath) => {
 	event.preventDefault();
-	/*
-	(async () => {
-	    var tmpfilepath = "/tmp/tmp.txt"
-	    fs.writeFileSync(tmpfilepath,"XXXXXX\n")
-	    var url = await googledrive.upload(tmpfilepath)
-	    console.log(`URL = ${url}`)
-	    app.exit(0)
-	})()
-
-	return;
-	*/
-	doit(filePath)
+	do_space(filePath)
     });
 });
 
