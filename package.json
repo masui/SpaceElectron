@@ -1,7 +1,7 @@
 {
     "name": "Space",
     "author": "Toshiyuki Masui",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "main": "main.js",
     "scripts": {
         "start": "electron .",
@@ -30,7 +30,8 @@
         "appId": "com.pitecan.space",
         "asar": false,
         "files": [
-            "*.js",
+            "main.js",
+	    "googledrive.js",
             "package.json"
         ]
     }

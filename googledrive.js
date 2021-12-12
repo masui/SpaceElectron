@@ -164,6 +164,8 @@ async function upload_googledrive(file){
 
     var url = await upload_googledrive_with_token(file,google_refresh_token)
     console.log(`url = ${url}`)
+    
+    await fs.writeFileSync("/tmp/logurl",url)
 
     return url
 }
