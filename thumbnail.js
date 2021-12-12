@@ -1,8 +1,11 @@
+//
+// qlmanageでサムネイルを作成
+//
 const fs = require('fs');
 const path = require('path')
 const { execSync } = require('child_process')
 
-function thumbnail(file,thumbnailfile){
+function thumbnail(file,thumbnailfile){ // fileのサムネイルをthumbnailfileとして作成
     if(!fs.existsSync(file)){
 	return null
     }
@@ -48,7 +51,7 @@ function thumbnail_html(file){
     <style type="text/css">
       body {
 	  background-color: #eee;
-git	  margin: 10pt;
+	  margin: 10pt;
 	  font-size:40pt;
 	  font-family: "Helvetica Neue" , Helvetica , Arial ,
 		       Verdana , Roboto , "游ゴシック" , "Yu Gothic" ,
