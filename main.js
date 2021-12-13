@@ -2,7 +2,8 @@
 // 「空間」アプリ
 //
 // Space.appという名前だが 自分のプロジェクト名.app に変更して利用する
-// プロジェクト名の「-」は「_」にする
+// このときプロジェクト名の「-」は「_」にする
+// e.g. masui-space ⇒masui_space.app
 //
 
 const {app, BrowserWindow} = require('electron');
@@ -35,7 +36,13 @@ async function start(){
 	app.exit(0)
     }
 }
-start()
+
+if(process.argv[1]){ // コマンドラインから引数つきで呼び出されたとき
+    space(process.argv[1])
+}
+else {
+    start()
+}
 
 //
 // 指定されたファイルをアップロードするメインルーチン
@@ -49,7 +56,7 @@ async function space(file){
 	const buff = fs.readFileSync(space_config_path, "utf8");
         const space_config_data = JSON.parse(buff)
 	if(space_config_data['s3-bucket']){
-            s3bucket = data['s3-bucket']
+            s3bucket = space_config_data['s3-bucket']
 	}
     }
 
@@ -104,12 +111,10 @@ async function space(file){
     var encoded = encodeURIComponent(str)
 
     cmd = `https://Scrapbox.io/${project}/${datestr}?body=${encoded}`
-    
     open(cmd)
 
     app.exit(0)
 }
-
 
 //
 // アプリのアイコンにファイルがDrag&Dropされたときの処理
