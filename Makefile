@@ -5,6 +5,9 @@ make: clean
 	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
 	ruby bin/droppable.rb /tmp/info.json > /tmp/info2.json
 	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
+	/bin/mv dist/mac/Space.app dist/mac/Masui_Space.app	
+
+# /bin/mv dist/mac/masui-space.app/Contents/MacOS/Space dist/mac/masui-space.app/Contents/MacOS/masui-space
 
 #mac:
 #	electron-packager ./app serencast --overwrite --platform=darwin --arch=x64 --electronV

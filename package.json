@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "axios": "^0.24.0",
+        "date-utils": "^1.2.21",
         "fetch": "^1.1.0",
         "filetype": "^0.1.0",
         "googleapis": "^92.0.0",
@@ -37,6 +38,9 @@
             "gyazo.js",
             "thumbnail.js",
             "package.json"
-        ]
+        ],
+        "mac": {
+            "icon": "space.icns"
+        }
     }
 }

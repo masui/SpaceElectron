@@ -1,45 +1,98 @@
+//
+// 「空間」アプリ
+//
+// Space.appという名前だが 自分のプロジェクト名.app に変更して利用する
+// プロジェクト名の「-」は「_」にする
+//
 
 const {app, BrowserWindow} = require('electron');
 
 const googledrive = require('./googledrive.js')
 const gyazo = require('./gyazo.js')
 const thumbnail = require('./thumbnail.js')
+
 const fs = require('fs');
+const open = require('open');
+const { execSync } = require('child_process')
+const crypto = require('crypto')
+const path = require('path');
+require('date-utils');
+
+
+var drag_drop = false
+
+var project = process.argv[0].match(/\/(\w+)\.app\//)[1].replace(/_/g,'-')
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function start(){
+    // 0.3秒待ってdrag_dropがfalseのままだったら単体起動と判定する
+    await sleep(300)
+    if(drag_drop == false){ // 単体起動
+	open(`https://Scrapbox.io/${project}`)
+	app.exit(0)
+    }
+}
+start()
 
 //
 // 指定されたファイルをアップロードするメインルーチン
 //
-async function do_space(file){  
+async function space(file){
+    //
+    // ファイルをGoogleDriveにセーブ
+    //
     var google_url = await googledrive.upload(file)
     console.log(`google_url = #{google_url}`)
-    
-	
+
+    //
+    // ファイルのサムネイルをGyazoにアップロード
+    //
     thumbnail.thumbnail(file,"/tmp/thumbnail.png")
-    
-    // async function upload_gyazo(imagefile,title,desc,t){
-    
     var date = new Date()
     var t = date.getTime() / 1000 // Unix time
     var gyazo_url = await gyazo.upload("/tmp/thumbnail.png",'SpaceApp',file,t)
-    console.log(`gyazo_url = #{gyazo_url}`)
+    console.log(`gyazo_url = ${gyazo_url}`)
 
-    /*
-    console.log("** list of argv[]")
-    if(process && process.argv){
-	if(process.argv[0]){
-	    console.log('- ' + process.argv[0])
-	    fs.writeFileSync("/tmp/argv0",process.argv[0])
-	}
-	if(process.argv[1]){
-	    console.log('- ' + process.argv[1])
-	    fs.writeFileSync("/tmp/argv1",process.argv[1])
-	}
-	if(process.argv[2]){
-	    console.log('- ' + process.argv[2])
-	    fs.writeFileSync("/tmp/argv2",process.argv[2])
-	}
-    }
-    */
+    fs.writeFileSync("/tmp/gyazourl",gyazo_url)
+    
+    //
+    // Scrapboxページ作成
+    //
+    attr = {}
+    attr['filename'] = file
+    attr['fullname'] = file // ??
+    attr['basename'] = path.basename(file)
+    attr['uploadurl'] = google_url
+    attr['gyazourl'] = gyazo_url
+
+    const md5 = crypto.createHash('md5')
+    let text = fs.readFileSync(file);
+    attr['md5'] = md5.update(text,'binary').digest('hex')
+
+    const stats = fs.statSync(file);
+    attr['time'] = stats.mtime
+    attr['size'] = stats.size
+    
+    fs.writeFileSync("/tmp/attr",'attr...')
+
+    str = ''
+    str += `[${attr['fullname']} ${attr['uploadurl']}]\n`
+    str += `File: [${attr['basename']}]\n`
+    str += `Size: ${attr['size']}\n`
+    str += `[[${attr['gyazourl']}]]\n`
+    
+    fs.writeFileSync("/tmp/str",str)
+    
+    let now = new Date();
+    var datestr = now.toFormat('YYYYMMDDHHMISS');
+    var encoded = encodeURIComponent(str)
+
+    cmd = `https://Scrapbox.io/${project}/${datestr}?body=${encoded}`
+    fs.writeFileSync('/tmp/open',cmd)
+    
+    open(cmd)
 
     app.exit(0)
 }
@@ -54,8 +107,7 @@ async function do_space(file){
 app.on('will-finish-launching', () => {
     app.on('open-file', (event, filePath) => {
 	event.preventDefault();
-	do_space(filePath)
+	drag_drop = true
+	space(filePath)
     });
 });
-
-
