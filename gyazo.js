@@ -1,5 +1,5 @@
 //
-// Google認証してGoogleDriveにファイルをアップロードする
+// 認証してGyazoに画像をアップロード
 // 同期的に動かせるように苦しいことをしている
 //
 const http = require('http');
@@ -8,14 +8,11 @@ const open = require('open');
 const url = require('url');
 const path = require('path');
 const fs = require('fs');
-//const mime = require('mime-types')
-//const fetch = require('node-fetch');
-// import axios from 'axios';
 
 //var request = require('request')
-var request = require('request-promise-native')
+var request = require('request-promise-native') // Promis版らしい
 
-const gyazo = require('gyazo');
+const Gyazo = require('gyazo-api');
 
 // アプリのパスを取得
 // Electronの場合とnodeから起動の場合で場所が違う
@@ -76,9 +73,8 @@ async function run_local_server_and_get_token(){
     }
 }
 
-//const FormData = require("form-data");
-
 async function get_gyazo_token_and_save(code){
+    // Gyazo認証API: https://gyazo.com/api/docs/auth
     console.log(`get_gyazo_token_and_save(${code})`)
     var options = {
 	url: 'https://gyazo.com/oauth/token',
@@ -91,47 +87,9 @@ async function get_gyazo_token_and_save(code){
 	    'grant_type': 'authorization_code'
 	}
     }
-    console.log("Request()")
-
-    /*
-    request(options,function (error,response,body) {
-	console.log('===========')
-        console.log(JSON.parse(response.body));
-    })
-    */
 
     var res = await request(options)
-    console.log(JSON.parse(res).access_token)
     var gyazo_token = JSON.parse(res).access_token
-
-    /*
-    let res = await oauth2Client.getToken(code)
-    var refresh_token = res.tokens.refresh_token
-    */
-    /*
-    const formData = new FormData();
-    formData.append('code',code)
-    formData.append('client_id',gyazo_client_id)
-    formData.append('client_secret',gyazo_client_secret)
-    formData.append('redirect_uri',gyazo_callback_url)
-    formData.append('grant_type','authorization_code')
-    // 送信用データを設定
-    const options = {
-	method: 'POST',
-	body: formData,
-	headers: {
-	    'Content-Type': 'multipart/form-data',
-	},
-    };
-
-    // ここで明示的に消してあげる
-    delete options.headers['Content-Type'];
-    //console.log(options)
-
-    // 設定したデータをPOST
-    var res = await fetch("https://gyazo.com/oauth/token", options);
-    console.log(res)
-    */
 
     try {
 	fs.writeFileSync(gyazo_token_path,gyazo_token + "\n")
@@ -139,31 +97,6 @@ async function get_gyazo_token_and_save(code){
 	console.log(e);
     }
     return gyazo_token
-
-    /*
-    #
-    # Gyazoのアクセストークンを取得
-    #
-    uri = URI.parse("https://gyazo.com/oauth/token")
-    req = Net::HTTP::Post.new(uri)
-    req.set_form_data({
-                        'code' => gyazo_auth_code,
-                        'client_id' => gyazo_client_id,
-                        'client_secret' => gyazo_client_secret,
-                        'redirect_uri' => gyazo_callback_url,
-                        'grant_type' => 'authorization_code'
-                      })
-    req_options = {
-      use_ssl: true
-    }
-    response = Net::HTTP.start(uri.hostname, uri.port, req_options) do |http|
-      http.request(req)
-    end
-    puts "response.body = #{response.body}"
-    set_gyazo_token JSON.parse(response.body)['access_token'] # responseはJSONで返る
-    dialog("Gyazoアクセストークンが生成されました。","OK",2)
-    log "gyazo_token = #{gyazo_token}"
-    */
 }
 
 async function get_gyazo_token(){
@@ -171,26 +104,28 @@ async function get_gyazo_token(){
     if(! token){ // refresh tokenをまだ取得できていない
 	token = await run_local_server_and_get_token();
     }
-    console.log(`get_gyazo_token: token=${token}`)
     return token;
 }
 
-async function upload_gyazo(file){
+async function upload_gyazo(imagefile,title,desc,t){
     var gyazo_token = await get_gyazo_token()
-    console.log(`gyazo_token = ${gyazo_token}`)
-
-    var url = await upload_gyazo_with_token(file,gyazo_token)
-    console.log(`url = ${url}`)
-    
-    await fs.writeFileSync("/tmp/logurl",url)
-
-    return url
+    var gyazo = new Gyazo(gyazo_token);
+    var res = await gyazo.upload(imagefile,{
+	title: title, // Fromに出る文字列
+	desc: desc,   // 大きく表示される説明分
+	created_at: t // Unix time
+    })
+    return res.data.permalink_url
 }
 
 // テスト
 if(__filename == apppath){
     (async () => {
-	await get_gyazo_token()
+	var date = new Date()
+	var t = date.getTime() / 1000 // Unix time
+	var url = await upload_gyazo('/Users/masui/a7218798723c17713be1dc5ceb69865e.png','SpaceTitle','SpaceDesc',t)
+	console.log(url)
+	
 	process.exit(0)
     })()
 }
