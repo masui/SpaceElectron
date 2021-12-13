@@ -45,11 +45,10 @@ async function space(file){
     var data_upload_url
 
     const space_config_path = process.env['HOME'] + '/.space'
-    fs.writeFileSync("/tmp/configpath",space_config_path)
     if(fs.existsSync(space_config_path)){
 	const buff = fs.readFileSync(space_config_path, "utf8");
-        var data = JSON.parse(buff)
-	if(data['s3-bucket']){
+        const space_config_data = JSON.parse(buff)
+	if(space_config_data['s3-bucket']){
             s3bucket = data['s3-bucket']
 	}
     }
@@ -65,7 +64,6 @@ async function space(file){
 	// ファイルをGoogleDriveにセーブ
 	//
 	data_upload_url = await googledrive.upload(file)
-	console.log(`google_url = #{google_url}`)
     }
 
     //
