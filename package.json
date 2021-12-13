@@ -38,6 +38,7 @@
             "gyazo.js",
             "thumbnail.js",
             "s3.js",
+	    "dialog.js",
             "package.json"
         ],
         "mac": {

@@ -13,6 +13,7 @@ const fs = require('fs');
 var request = require('request-promise-native') // Promis版らしい
 
 const Gyazo = require('gyazo-api');
+const dialog = require('./dialog');
 
 // アプリのパスを取得
 // Electronの場合とnodeから起動の場合で場所が違う
@@ -102,7 +103,9 @@ async function get_gyazo_token_and_save(code){
 async function get_gyazo_token(){
     var token = gyazo_token() // セーブされてるトークンを得る
     if(! token){ // Gyazo tokenをまだ取得できていない
+	dialog.dialog("Gyazoアクセストークンを生成するため認証してください","OK",3)
 	token = await run_local_server_and_get_token();
+	dialog.dialog("Gyazoアクセストークンが生成されました。","OK",2)
     }
     return token;
 }

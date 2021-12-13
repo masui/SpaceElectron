@@ -9,6 +9,7 @@ make: clean
 
 dmg: make
 	hdiutil create dist/space.dmg -volname "Space" -srcfolder dist/mac
+	scp dist/space.dmg pitecan.com:/www/www.pitecan.com/tmp
 
 #mac:
 #	electron-packager ./app serencast --overwrite --platform=darwin --arch=x64 --electronV
