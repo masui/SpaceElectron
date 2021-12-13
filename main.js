@@ -2,15 +2,28 @@
 const {app, BrowserWindow} = require('electron');
 
 const googledrive = require('./googledrive.js')
+const gyazo = require('./gyazo.js')
+const thumbnail = require('./thumbnail.js')
 const fs = require('fs');
 
 //
 // 指定されたファイルをアップロードするメインルーチン
 //
 async function do_space(file){  
-    var googleurl = await googledrive.upload(file)
-    console.log(`upload end googleurl = #{googleurl}`)
+    var google_url = await googledrive.upload(file)
+    console.log(`google_url = #{google_url}`)
     
+	
+    thumbnail.thumbnail(file,"/tmp/thumbnail.png")
+    
+    // async function upload_gyazo(imagefile,title,desc,t){
+    
+    var date = new Date()
+    var t = date.getTime() / 1000 // Unix time
+    var gyazo_url = await gyazo.upload("/tmp/thumbnail.png",'SpaceApp',file,t)
+    console.log(`gyazo_url = #{gyazo_url}`)
+
+    /*
     console.log("** list of argv[]")
     if(process && process.argv){
 	if(process.argv[0]){
@@ -26,6 +39,7 @@ async function do_space(file){
 	    fs.writeFileSync("/tmp/argv2",process.argv[2])
 	}
     }
+    */
 
     app.exit(0)
 }

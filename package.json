@@ -34,6 +34,7 @@
         "files": [
             "main.js",
             "googledrive.js",
+            "gyazo.js",
             "thumbnail.js",
             "package.json"
         ]

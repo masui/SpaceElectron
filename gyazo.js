@@ -101,7 +101,7 @@ async function get_gyazo_token_and_save(code){
 
 async function get_gyazo_token(){
     var token = gyazo_token() // セーブされてるトークンを得る
-    if(! token){ // refresh tokenをまだ取得できていない
+    if(! token){ // Gyazo tokenをまだ取得できていない
 	token = await run_local_server_and_get_token();
     }
     return token;
@@ -123,9 +123,11 @@ if(__filename == apppath){
     (async () => {
 	var date = new Date()
 	var t = date.getTime() / 1000 // Unix time
-	var url = await upload_gyazo('/Users/masui/a7218798723c17713be1dc5ceb69865e.png','SpaceTitle','SpaceDesc',t)
+	var url = await upload_gyazo('/Applications/Emacs.app/Contents/Resources/etc/images/splash.png','Emacs app','Emacs Logo',t)
 	console.log(url)
 	
 	process.exit(0)
     })()
 }
+
+exports.upload = upload_gyazo
