@@ -60,7 +60,7 @@ async function space(file){
 	}
     }
 
-    if(s3bucket){ / ファイルをS3にセーブ
+    if(s3bucket){ // ファイルをS3にセーブ
 	data_upload_url = s3.upload(file,s3bucket)
     }
     else { // ファイルをGoogleDriveにセーブ
@@ -81,7 +81,7 @@ async function space(file){
     //
     attr = {}
     attr['filename'] = file
-    attr['fullname'] = file // ??
+    attr['fullname'] = path.resolve(file)
     attr['basename'] = path.basename(file)
     attr['uploadurl'] = data_upload_url
     attr['gyazourl'] = gyazo_url
@@ -107,6 +107,13 @@ async function space(file){
     // Scrapboxページを開く
     cmd = `https://Scrapbox.io/${project}/${datestr}?body=${encoded}`
     open(cmd)
+
+    // ファイルをゴミ箱に移動
+    var trashscript = `
+tell application "Finder"
+  move POSIX file "${attr['fullname']}" to trash
+end tell`
+    execSync(`/usr/bin/osascript -e '${trashscript}'`)
 
     app.exit(0)
 }
