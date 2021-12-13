@@ -10,6 +10,7 @@ const {app, BrowserWindow} = require('electron');
 const googledrive = require('./googledrive.js')
 const gyazo = require('./gyazo.js')
 const thumbnail = require('./thumbnail.js')
+const s3 = require('./s3.js')
 
 const fs = require('fs');
 const open = require('open');
@@ -40,11 +41,32 @@ start()
 // 指定されたファイルをアップロードするメインルーチン
 //
 async function space(file){
-    //
-    // ファイルをGoogleDriveにセーブ
-    //
-    var google_url = await googledrive.upload(file)
-    console.log(`google_url = #{google_url}`)
+    var s3bucket = null
+    var data_upload_url
+
+    const space_config_path = process.env['HOME'] + '/.space'
+    fs.writeFileSync("/tmp/configpath",space_config_path)
+    if(fs.existsSync(space_config_path)){
+	const buff = fs.readFileSync(space_config_path, "utf8");
+        var data = JSON.parse(buff)
+	if(data['s3-bucket']){
+            s3bucket = data['s3-bucket']
+	}
+    }
+
+    if(s3bucket){
+	//
+	// ファイルをS3にセーブ
+	//
+	data_upload_url = s3.upload(file,s3bucket)
+    }
+    else {
+	//
+	// ファイルをGoogleDriveにセーブ
+	//
+	data_upload_url = await googledrive.upload(file)
+	console.log(`google_url = #{google_url}`)
+    }
 
     //
     // ファイルのサムネイルをGyazoにアップロード
@@ -55,8 +77,6 @@ async function space(file){
     var gyazo_url = await gyazo.upload("/tmp/thumbnail.png",'SpaceApp',file,t)
     console.log(`gyazo_url = ${gyazo_url}`)
 
-    fs.writeFileSync("/tmp/gyazourl",gyazo_url)
-    
     //
     // Scrapboxページ作成
     //
@@ -64,7 +84,7 @@ async function space(file){
     attr['filename'] = file
     attr['fullname'] = file // ??
     attr['basename'] = path.basename(file)
-    attr['uploadurl'] = google_url
+    attr['uploadurl'] = data_upload_url
     attr['gyazourl'] = gyazo_url
 
     const md5 = crypto.createHash('md5')
@@ -75,22 +95,17 @@ async function space(file){
     attr['time'] = stats.mtime
     attr['size'] = stats.size
     
-    fs.writeFileSync("/tmp/attr",'attr...')
-
     str = ''
     str += `[${attr['fullname']} ${attr['uploadurl']}]\n`
     str += `File: [${attr['basename']}]\n`
     str += `Size: ${attr['size']}\n`
     str += `[[${attr['gyazourl']}]]\n`
     
-    fs.writeFileSync("/tmp/str",str)
-    
     let now = new Date();
     var datestr = now.toFormat('YYYYMMDDHHMISS');
     var encoded = encodeURIComponent(str)
 
     cmd = `https://Scrapbox.io/${project}/${datestr}?body=${encoded}`
-    fs.writeFileSync('/tmp/open',cmd)
     
     open(cmd)
 

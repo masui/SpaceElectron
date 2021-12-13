@@ -37,6 +37,7 @@
             "googledrive.js",
             "gyazo.js",
             "thumbnail.js",
+            "s3.js",
             "package.json"
         ],
         "mac": {
