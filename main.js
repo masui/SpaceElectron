@@ -55,21 +55,15 @@ async function space(file){
     if(fs.existsSync(space_config_path)){
 	const buff = fs.readFileSync(space_config_path, "utf8");
         const space_config_data = JSON.parse(buff)
-	if(space_config_data['s3-bucket']){
+	if(space_config_data){
             s3bucket = space_config_data['s3-bucket']
 	}
     }
 
-    if(s3bucket){
-	//
-	// ファイルをS3にセーブ
-	//
+    if(s3bucket){ / ファイルをS3にセーブ
 	data_upload_url = s3.upload(file,s3bucket)
     }
-    else {
-	//
-	// ファイルをGoogleDriveにセーブ
-	//
+    else { // ファイルをGoogleDriveにセーブ
 	data_upload_url = await googledrive.upload(file)
     }
 
@@ -110,6 +104,7 @@ async function space(file){
     var datestr = now.toFormat('YYYYMMDDHHMISS');
     var encoded = encodeURIComponent(str)
 
+    // Scrapboxページを開く
     cmd = `https://Scrapbox.io/${project}/${datestr}?body=${encoded}`
     open(cmd)
 
@@ -119,6 +114,7 @@ async function space(file){
 //
 // アプリのアイコンにファイルがDrag&Dropされたときの処理
 // Info.plistは修正しておく必要がある
+// (bin/droppable.rbで変換)
 //
 // https://taku-o.hatenablog.jp/entry/20181024/1540380159
 //

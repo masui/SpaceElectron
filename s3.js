@@ -1,5 +1,6 @@
 //
-//
+// S3にファイルをアップロードする
+// aws cpコマンドを利用
 //
 const crypto = require('crypto')
 const fs = require('fs');
@@ -21,10 +22,10 @@ function upload_s3(file,bucket){
     // ファイル名が日本語だとうまくいかないことがあるので別ファイルにコピーしてからアップロード
     var content_type = ''
     if(ext.match(/^\.pdf$/i)){
-	content_type = "--content-type application/pdf "
+	content_type = "--content-type application/pdf"
     }
     if(ext.match(/^\.txt$/i)){
-	content_type = "--content-type text/plain "
+	content_type = "--content-type text/plain"
     }
     var dstfile = `s3://${bucket}/${hash[0]}/${hash[1]}/${hash}${ext}`
 

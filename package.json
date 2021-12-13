@@ -5,8 +5,7 @@
     "main": "main.js",
     "scripts": {
         "start": "electron .",
-        "build": "electron-builder",
-	"dmg": "electron-builder --mac --x64"
+        "build": "electron-builder"
     },
     "devDependencies": {
         "electron": "^16.0.4",
