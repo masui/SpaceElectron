@@ -18,6 +18,7 @@ const open = require('open');
 const { execSync } = require('child_process')
 const crypto = require('crypto')
 const path = require('path');
+
 require('date-utils');
 
 
@@ -121,7 +122,7 @@ end tell`
 //
 // アプリのアイコンにファイルがDrag&Dropされたときの処理
 // Info.plistは修正しておく必要がある
-// (bin/droppable.rbで変換)
+// (droppable.rbで変換)
 //
 // https://taku-o.hatenablog.jp/entry/20181024/1540380159
 //
