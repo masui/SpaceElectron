@@ -20,4 +20,7 @@ cli:
 clean:
 	-/bin/rm -r -f dist
 
+npm:
+	npm install
+
 
