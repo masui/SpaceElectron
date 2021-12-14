@@ -1,6 +1,6 @@
 const { execSync } = require('child_process')
 
-// const electron = require('electron');
+const electron = require('electron');
 
 
 /* appがreadyの後じゃないと駄目といって怒られる
@@ -13,6 +13,12 @@ function dialog(message, button, timeout=3){
         detail: '詳細メッセージ'
     };
     electron.dialog.showMessageBoxSync(options);
+}
+*/
+
+/*
+function dialog(message, button, timeout=3){
+    electron.dialog.showErrorBoxSync(message, button)
 }
 */
 

@@ -6,7 +6,7 @@
 // e.g. masui-space ⇒masui_space.app
 //
 
-const {app, BrowserWindow} = require('electron');
+const {app, dialog, BrowserWindow} = require('electron');
 
 const googledrive = require('./googledrive.js')
 const gyazo = require('./gyazo.js')
@@ -18,9 +18,7 @@ const open = require('open');
 const { execSync } = require('child_process')
 const crypto = require('crypto')
 const path = require('path');
-
-require('date-utils');
-
+const date_utils = require('date-utils');
 
 var drag_drop = false
 
@@ -103,10 +101,12 @@ async function space(file){
     
     let now = new Date();
     var datestr = now.toFormat('YYYYMMDDHHMISS');
+    var title = encodeURIComponent(`${attr['basename']} ${datestr}`)
     var encoded = encodeURIComponent(str)
 
     // Scrapboxページを開く
-    cmd = `https://Scrapbox.io/${project}/${datestr}?body=${encoded}`
+    cmd = `https://Scrapbox.io/${project}/${title}?body=${encoded}`
+    console.log(`https://Scrapbox.io/${project}/${title}?body=${encoded}`)
     open(cmd)
 
     // ファイルをゴミ箱に移動
