@@ -65,7 +65,8 @@ async function run_local_server_and_get_token(){
 	    const qs = querystring.parse(url.parse(req.url).query);
 	    code = qs.code
 	    // res.end('Google認証に成功しました');
-	    res.end("GoogleDrive auth success")
+	    //res.end("GoogleDrive auth success")
+	    res.end('<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head><body>GoogleDrive認証に成功しました</body>')
 	    server.close();
 	    
 	    token = get_refresh_token_and_save(code)

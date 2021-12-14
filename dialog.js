@@ -1,5 +1,21 @@
 const { execSync } = require('child_process')
 
+// const electron = require('electron');
+
+
+/* appがreadyの後じゃないと駄目といって怒られる
+function dialog(message, button, timeout=3){
+    var options = {
+        type: 'info',
+        buttons: ['OK', 'テスト', 'Cancel', 'sample', 'Yes', 'No'],
+        title: 'タイトル',
+        message: 'メッセージ',
+        detail: '詳細メッセージ'
+    };
+    electron.dialog.showMessageBoxSync(options);
+}
+*/
+
 function dialog(message, button, timeout=3){
     var buttons = '';
     var a = []

@@ -9,6 +9,7 @@ dmg: make
 	scp dist/Space.dmg pitecan.com:/www/www.pitecan.com/tmp
 
 masui: make
+	- /bin/rm -r -f /Applications/Masui_Space.app
 	/bin/cp -r dist/mac/Space.app /Applications/Masui_Space.app
 
 #mac:
