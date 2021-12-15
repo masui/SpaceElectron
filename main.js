@@ -22,7 +22,7 @@ const date_utils = require('date-utils');
 
 var drag_drop = false
 
-fs.writeFileSync("/tmp/log",process.argv[0] + "\n")
+// fs.writeFileSync("/tmp/log",process.argv[0] + "\n")
 
 var project = process.argv[0].match(/\/(\w+)\.app\//)[1].replace(/_/g,'-')
 
@@ -37,6 +37,13 @@ async function start(){
 	app.exit(0)
     }
 }
+
+//console.log(process.argv[0])
+//console.log(process.argv[1])
+//console.log(process.argv[2])
+//console.log(process.argv[3])
+
+//space("/Users/masui/Desktop/junk.txt")
 
 if(process.argv[1]){ // コマンドラインから引数つきで呼び出されたとき
     space(process.argv[1])
@@ -58,6 +65,9 @@ async function space(file){
         const space_config_data = JSON.parse(buff)
 	if(space_config_data){
             s3bucket = space_config_data['s3-bucket']
+            if(space_config_data['project']){
+		project = space_config_data['project']
+	    }
 	}
     }
 
@@ -76,6 +86,7 @@ async function space(file){
     var t = date.getTime() / 1000 // Unix time
     var gyazo_url = await gyazo.upload("/tmp/thumbnail.png",'SpaceApp',file,t)
     console.log(`gyazo_url = ${gyazo_url}`)
+    execSync("/bin/rm -f /tmp/thumbnail.png")
 
     //
     // Scrapboxページ作成
