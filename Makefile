@@ -1,14 +1,19 @@
 make: clean
 	npx electron-builder --mac --x64 --dir
-	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
-	ruby droppable.rb /tmp/info.json > /tmp/info2.json
-	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
+#	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
+#	ruby droppable.rb /tmp/info.json > /tmp/info2.json
+#	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
+
+disable:
+	CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --x64 --dir
+
+#	npx electron-builder --mac --x64 --dir -c.mac.identity=null
 
 make2: clean
 	npx electron-builder --mac --x64
-	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
-	ruby droppable.rb /tmp/info.json > /tmp/info2.json
-	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
+#	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
+#	ruby droppable.rb /tmp/info.json > /tmp/info2.json
+#	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
 
 dmg: make
 	hdiutil create dist/Space.dmg -volname "Space" -srcfolder dist/mac
@@ -31,3 +36,4 @@ npm:
 	npm install
 
 
+# electron-packager . YourAppName --platform=darwin --arch=x64 --extend-info=extend.plist

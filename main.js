@@ -22,6 +22,8 @@ const date_utils = require('date-utils');
 
 var drag_drop = false
 
+fs.writeFileSync("/tmp/log",process.argv[0] + "\n")
+
 var project = process.argv[0].match(/\/(\w+)\.app\//)[1].replace(/_/g,'-')
 
 function sleep(ms) {

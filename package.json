@@ -14,6 +14,8 @@
     "dependencies": {
         "axios": "^0.24.0",
         "date-utils": "^1.2.21",
+        "dotenv": "^10.0.0",
+        "electron-notarize": "^1.1.1",
         "fetch": "^1.1.0",
         "filetype": "^0.1.0",
         "googleapis": "^92.0.0",
@@ -32,6 +34,7 @@
     "build": {
         "productName": "Space",
         "appId": "com.pitecan.space",
+	"afterSign": "notarize.js",
         "asar": false,
         "files": [
             "main.js",
@@ -44,7 +47,26 @@
         ],
         "mac": {
             "target": "dmg",
-            "icon": "space.icns"
-        }
+            "icon": "space.icns",
+	    "gatekeeperAssess": false,
+	    "entitlements": "entitlements.mac.plist",
+	    "entitlementsInherit": "entitlements.mac.plist",
+	    "extendInfo": {
+		"CFBundleDocumentTypes":[
+		    {
+			"CFBundleTypeName": "All Files",
+			"LSHandlerRank": "Owner",
+			"LSItemContentTypes": [
+			    "public.text",
+			    "public.data",
+			    "public.content"
+			]
+		    }
+		]
+	    }
+        },
+	"dmg": {
+	    "sign": false
+	}
     }
 }

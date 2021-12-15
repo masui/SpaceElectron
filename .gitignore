@@ -4,5 +4,5 @@
 dist
 node_modules
 google_refresh_token
-info.json
-info2.json
+gyazo_token
+.env
