@@ -46,6 +46,7 @@
             "package.json"
         ],
         "mac": {
+	    "forceCodeSigning": false,
             "target": "dmg",
             "icon": "space.icns",
 	    "gatekeeperAssess": false,
