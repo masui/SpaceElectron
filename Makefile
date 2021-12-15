@@ -4,6 +4,12 @@ make: clean
 	ruby droppable.rb /tmp/info.json > /tmp/info2.json
 	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
 
+make2: clean
+	npx electron-builder --mac --x64
+	plutil -convert json dist/mac/Space.app/Contents/Info.plist -o - > /tmp/info.json
+	ruby droppable.rb /tmp/info.json > /tmp/info2.json
+	plutil -convert binary1 /tmp/info2.json -o dist/mac/Space.app/Contents/Info.plist
+
 dmg: make
 	hdiutil create dist/Space.dmg -volname "Space" -srcfolder dist/mac
 	scp dist/Space.dmg pitecan.com:/www/www.pitecan.com/tmp

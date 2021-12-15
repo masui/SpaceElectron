@@ -100,13 +100,13 @@ async function get_refresh_token_and_save(code){
 async function get_google_refresh_token(){
     var token = google_refresh_token() // セーブされてるトークンを得る
     if(! token){ // refresh tokenをまだ取得できていない
-	dialog.dialog("GoogleDriveのアクセストークンを生成するため認証してください","OK",3)
+    	// dialog.dialog("GoogleDriveのアクセストークンを生成するため認証してください","OK",3)
 	token = await run_local_server_and_get_token();
 	if(!token){
 	    dialog.dialog("ブラウザでGoogleからログアウトしてDrag&Dropを再実行してください","OK",5)
 	    app.exit(0)
 	}
-	dialog.dialog("GoogleDriveのアクセストークンが生成されました。","OK",2)
+	//dialog.dialog("GoogleDriveのアクセストークンが生成されました。","OK",2)
     }
     return token;
 }

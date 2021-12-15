@@ -52,6 +52,8 @@ async function run_local_server_and_get_token(){
 
     const server = http.createServer(async (req, res) => {
 	if (req.url.indexOf('code') > -1) {
+	    //dialog.dialog("Gyazoアクセストークンを生成するため認証してください","OK",3)
+	    
 	    // acquire the code from the querystring, and close the web server.
 	    const qs = querystring.parse(url.parse(req.url).query);
 	    code = qs.code
@@ -104,9 +106,9 @@ async function get_gyazo_token_and_save(code){
 async function get_gyazo_token(){
     var token = gyazo_token() // セーブされてるトークンを得る
     if(! token){ // Gyazo tokenをまだ取得できていない
-	dialog.dialog("Gyazoアクセストークンを生成するため認証してください","OK",3)
+	//dialog.dialog("Gyazoアクセストークンを生成するため認証してください","OK",3)
 	token = await run_local_server_and_get_token();
-	dialog.dialog("Gyazoアクセストークンが生成されました。","OK",2)
+	//dialog.dialog("Gyazoアクセストークンが生成されました。","OK",2)
     }
     return token;
 }

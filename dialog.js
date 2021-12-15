@@ -34,7 +34,8 @@ async function dialog(message, button, timeout=3){
 	    break
 	}
     }
-    electron.dialog.showMessageBoxSync(options);
+    // electron.dialog.showMessageBoxSync(options);
+    electron.dialog.showMessageBox(null,options);
 }
 
 /*
