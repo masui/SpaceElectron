@@ -19,6 +19,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+/*
 async function dialog(message, button, timeout=3){
     // electron.dialog.showErrorBox(message, button)
 
@@ -37,8 +38,8 @@ async function dialog(message, button, timeout=3){
     // electron.dialog.showMessageBoxSync(options);
     electron.dialog.showMessageBox(null,options);
 }
+*/
 
-/*
 function dialog(message, button, timeout=3){
     var buttons = '';
     var a = []
@@ -53,6 +54,6 @@ function dialog(message, button, timeout=3){
     var res = execSync(`/usr/bin/osascript -e '${script}'`)
     return res.toString()
 }
-*/
 
 exports.dialog = dialog
+
