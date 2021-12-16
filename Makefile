@@ -1,26 +1,27 @@
 #
-# ビルドしてから公証
+# appをビルドしてから公証
 # 時間がかかる
 #
 app: clean
 	npx electron-builder --mac --x64 --dir
 
-# 公証しないとき - デバッグ用
+#
+# 環境編集を指定して公証をスキップする
+# notarize.jsでもこの環境変数を見ている
+#
 appnosign:
 	CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder --mac --x64 --dir
 
-# これはうまくいかない
-#appnosign:
-#	npx electron-builder --mac --x64 --dir -c.mac.identity=null
-
-# electron-builderでDMG作成
+#
+# electron-builderで公開用DMG作成
 # 公証する
+#
 dmg: clean
 	npx electron-builder --mac --x64
 
 #
-# 公証したappをhdutilでdmgにして大丈夫なのだろうか?
-# そんな必要はないか...
+# 公証したappをhdutilでdmgにして大丈夫なのかは不明
+# 公開は頻繁に行なうわけではないから、上の方法を使うのがよさそう
 #
 #dmg:
 #	-/bin/rm -f dist/Space.dmg
@@ -31,9 +32,6 @@ masui: appnosign
 	- /bin/rm -r -f /Applications/Masui_Space.app
 	/bin/cp -r dist/mac/Space.app /Applications/Masui_Space.app
 
-#mac:
-#	electron-packager ./app serencast --overwrite --platform=darwin --arch=x64 --electronV
-
 cli:
 	dist/mac/Space.app/Contents/MacOS/Space
 
@@ -42,6 +40,3 @@ clean:
 
 npm:
 	npm install
-
-
-# electron-packager . YourAppName --platform=darwin --arch=x64 --extend-info=extend.plist

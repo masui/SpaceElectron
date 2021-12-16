@@ -22,9 +22,21 @@ const date_utils = require('date-utils');
 
 var drag_drop = false
 
-// fs.writeFileSync("/tmp/log",process.argv[0] + "\n")
+var project = process.argv[0].match(/\/(\w+)\.app\//)[1].replace(/_/g,'-') // ファイル名からプロジェクト名を得る
 
-var project = process.argv[0].match(/\/(\w+)\.app\//)[1].replace(/_/g,'-')
+//
+// ~/.spaceがあれば設定を読み込み
+//
+const space_config_path = process.env['HOME'] + '/.space'
+var config = {}
+if(fs.existsSync(space_config_path)){
+    const buff = fs.readFileSync(space_config_path, "utf8");
+    const space_config_data = JSON.parse(buff)
+    if(space_config_data){
+	config = space_config_data
+    }
+    if(config['project']) project = config['project']
+}
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -38,13 +50,6 @@ async function start(){
     }
 }
 
-//console.log(process.argv[0])
-//console.log(process.argv[1])
-//console.log(process.argv[2])
-//console.log(process.argv[3])
-
-//space("/Users/masui/Desktop/junk.txt")
-
 if(process.argv[1]){ // コマンドラインから引数つきで呼び出されたとき
     space(process.argv[1])
 }
@@ -56,21 +61,9 @@ else {
 // 指定されたファイルをアップロードするメインルーチン
 //
 async function space(file){
-    var s3bucket = null
     var data_upload_url
-
-    const space_config_path = process.env['HOME'] + '/.space'
-    if(fs.existsSync(space_config_path)){
-	const buff = fs.readFileSync(space_config_path, "utf8");
-        const space_config_data = JSON.parse(buff)
-	if(space_config_data){
-            s3bucket = space_config_data['s3-bucket']
-            if(space_config_data['project']){
-		project = space_config_data['project']
-	    }
-	}
-    }
-
+    
+    var s3bucket = config['s3-bucket']
     if(s3bucket){ // ファイルをS3にセーブ
 	data_upload_url = s3.upload(file,s3bucket)
     }
