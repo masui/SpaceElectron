@@ -29,8 +29,8 @@ function thumbnail(file,thumbnailfile){ // fileのサムネイルをthumbnailfil
     }
 
     if(fs.existsSync(pngpath)){
-	execSync(`/bin/cp ${pngpath} ${thumbnailfile}`)
-	execSync(`/bin/rm -f ${pngpath}`)
+	execSync(`/bin/cp '${pngpath}' ${thumbnailfile}`)
+	execSync(`/bin/rm -f '${pngpath}'`)
     }
     else {
 	console.log(`${pngpath}作成失敗`)
