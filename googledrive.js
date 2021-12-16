@@ -104,7 +104,7 @@ async function get_google_refresh_token(){
 	token = await run_local_server_and_get_token();
 	if(!token){
 	    dialog.dialog("ブラウザでGoogleからログアウトしてDrag&Dropを再実行してください","OK",5)
-	    app.exit(0)
+	    process.exit(0)
 	}
 	//dialog.dialog("GoogleDriveのアクセストークンが生成されました。","OK",2)
     }
