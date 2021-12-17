@@ -30,7 +30,7 @@ function upload_s3(file,bucket){
     var dstfile = `s3://${bucket}/${hash[0]}/${hash[1]}/${hash}${ext}`
 
     execSync(`/bin/cp '${file}' /tmp/__space_file`)
-    execSync(`/usr/local/bin/aws s3 cp --profile default /tmp/__space_file ${dstfile} ${content_type} --acl public-read `)
+    execSync(`aws s3 cp --profile default /tmp/__space_file ${dstfile} ${content_type} --acl public-read `)
     execSync('/bin/rm /tmp/__space_file')
     
     return `https://s3-ap-northeast-1.amazonaws.com/${bucket}/${hash[0]}/${hash[1]}/${hash}${ext}`
