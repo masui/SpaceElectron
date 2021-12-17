@@ -6,6 +6,21 @@ const crypto = require('crypto')
 const fs = require('fs');
 const { execSync } = require('child_process')
 
+function aws_path(){
+    const pathlist = process.env['PATH'].split(/:/)
+    pathlist.push('/usr/local/bin')
+    pathlist.push('/opt/homebrew/bin')
+    pathlist.push('/usr/local/aws-cli')
+    for(var i=0;i<pathlist.length;i++){
+	var cmdpath = `${pathlist[i]}/aws`
+	if(fs.existsSync(cmdpath)){
+	    return cmdpath
+	}
+    }
+    console.log('aws not installed')
+    process.exit(0)
+}
+
 function upload_s3(file,bucket){
     var ext = ''
     var a = file.match(/^(.*)(\.\w+)$/)
@@ -30,18 +45,18 @@ function upload_s3(file,bucket){
     var dstfile = `s3://${bucket}/${hash[0]}/${hash[1]}/${hash}${ext}`
 
     execSync(`/bin/cp '${file}' /tmp/__space_file`)
-    execSync(`aws s3 cp --profile default /tmp/__space_file ${dstfile} ${content_type} --acl public-read `)
+    execSync(`${aws_path()} s3 cp --profile default /tmp/__space_file ${dstfile} ${content_type} --acl public-read `)
     execSync('/bin/rm /tmp/__space_file')
     
     return `https://s3-ap-northeast-1.amazonaws.com/${bucket}/${hash[0]}/${hash[1]}/${hash}${ext}`
 }
-
 
 // テスト
 var apppath = process.argv[0]
 if(apppath.match(/\/node$/)){
     apppath = process.argv[1]
 }
+
 if(__filename == apppath){
     (() => {
 	var tmpfilepath = "/tmp/tmp.txt"
@@ -53,3 +68,4 @@ if(__filename == apppath){
 }
 
 exports.upload = upload_s3
+
